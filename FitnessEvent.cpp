@@ -1,15 +1,48 @@
 #include "FitnessEvent.h"
 
-FitnessEvent::FitnessEvent()// default constrctor
+FitnessEvent::FitnessEvent(string* newNbhdList, int newSize, string fileName)// default constrctor
 {
-	size = 6;
-	neighboorhoods[6];
-	string areas[]= { "Old Towne","El Modena","Orange Hills","Santiago Creek", "Villa Park Area","North El Camino Real" };
-	for (int i = 0; i < size; i++)
+	size = newSize;
+	neighboorhoods = newNbhdList;
+
+	ifstream partData(fileName);
+	partData.open();
+	if (!partData)
 	{
-		neighboorhoods[i] = areas[i];
+		cout << "File not opened." << endl;
+		listFirst = listLast = nullptr;
+	}
+	else
+	{
+		string line;
+		while (getline(partData, line))
+		{
+			int IDEnd = line.find(' ');
+			int temp = line.find(' ', IDEnd + 1);
+			int nameEnd = line.find(' ', temp + 1);
+
+			double* miles = new double[size];
+			int end = nameEnd;
+
+			for (int i = 0; i < size; i++)
+			{
+				miles[i] = stod(line.substr(end + 1, line.find(' ', end)));
+				end = line.find(' ', end + 1);
+			}
+
+			if (listFirst == nullptr)
+			{
+				listFirst = listLast = new Participant(stoi(line.substr(0, IDEnd)), line.substr(IDEnd + 1, (line.substr(IDEnd + 1, nameEnd).length() - IDEnd)), miles, size);
+			}
+			else
+			{
+				listLast->next = new Participant(stoi(line.substr(0, IDEnd)), line.substr(IDEnd + 1, (line.substr(IDEnd + 1, nameEnd).length() - IDEnd)), miles, size);
+				listLast = listLast->next;
+			}
+		}
 	}
 
+	partData.close();
 }
 
 //Big five
@@ -37,32 +70,57 @@ FitnessEvent FitnessEvent:: operator=(FitnessEvent&& other) noexcept //Move assi
 FitnessEvent::~FitnessEvent() // Destructor
 {
 
+	Participant* current = listFirst;
+	Participant* nextNode = nullptr;
+
+	while (current != nullptr)
+	{
+		nextNode = current->next;
+		delete current;
+		current = nextNode;
+	}
+
+	listFirst = listLast = nullptr;
+
 }
 
 //Participant Linked List Methods
-void addPartcipant(string name)
-{
-
-}
-
 void FitnessEvent::displayParticipants() const
 {
+	Participant* current = listFirst;
 
-}
-
-void FitnessEvent::removeParticipant(string name)
-{
-
+	while (current != nullptr)
+	{
+		cout << current->name << endl;
+		current = current->next;
+	}
 }
 
 Participant* FitnessEvent::search(string name) const
 {
+	if (listFirst == nullptr)
+		return nullptr;
 
+	Participant* current = listFirst;
+	if (current->name == name)
+		return current;
+	else
+		return nullptr;
 }
 
-double FitnessEvent::totMilesRun(string name)
+Participant* FitnessEvent::findMostMiles()
 {
+	Participant* most = listFirst;
+	Participant* current = listFirst->next;
 
+	while (current != nullptr)
+	{
+		if (most->totalMiles <= current->totalMiles)
+			most = current;
+		current = current->next
+	}
+
+	return most;
 }
 
 //Neighboorhood accessor and mutator
@@ -74,18 +132,8 @@ void FitnessEvent::displayNeighboorhoods()
 	}
 }
 
-void FitnessEvent::changeNeighboorhood(int index, string newNeighboorhood)
-{
-	neighboorhoods[index] = newNeighboorhood;
-}
-
 //Size accessor and mutator
 int FitnessEvent::getSize()
 {
 	return size;
-}
-
-void FitnessEvent::changeSize(int newSize)
-{
-	size = newSize; 
 }
