@@ -15,8 +15,8 @@ using namespace std;
 int main()
 {
     //create neighborhood list
-    string neighborhoods[] = { "Downtown", "Lakeside", "Hills" };
-    int size = 3;
+    string neighborhoods[] = {"OldTowne", "ElModerna", "OrangeHills", "SantiagoCreek", "VillaParkArea", "NorthElCaminoReal"};
+    int size = 6;
 
     //create fitness event
     cout << "creating FitnessEvent from file" << endl;
